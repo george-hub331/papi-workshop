@@ -1,8 +1,13 @@
 {
-  "name": "apx",
+  "name": "papi-workshop",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@polkadot/api": "^16.4.9",
+    "@polkadot/extension-dapp": "^0.62.2",
+    "@polkadot/keyring": "^13.5.7",
+    "@polkadot/util": "^13.5.7",
+    "@polkadot/util-crypto": "^13.5.7",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
