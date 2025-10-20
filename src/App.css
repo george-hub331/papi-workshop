@@ -1,38 +1,795 @@
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #1e293b;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Polkadot Logo */
+.polkadot-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 30px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(230, 0, 122, 0.1);
+  border: 2px solid rgba(230, 0, 122, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.polkadot-dot {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #E6007A 0%, #FF6B9D 50%, #E6007A 100%);
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(230, 0, 122, 0.3);
+  animation: pulse 3s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.polkadot-dot::before {
+  content: '';
+  /* position: absolute; */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+}
+
+.polkadot-dot::after {
+  content: '';
+  /* position: absolute; */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #E6007A;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(230, 0, 122, 0.6);
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 8px 32px rgba(230, 0, 122, 0.3);
+  }
+  50% { 
+    transform: scale(1.08);
+    box-shadow: 0 12px 40px rgba(230, 0, 122, 0.5);
+  }
+}
+
+h1 {
+  font-size: 3rem;
+  margin: 0;
+  background: linear-gradient(135deg, #E6007A 0%, #FF6B9D 50%, #E6007A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  letter-spacing: -0.02em;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.logo-text h1 {
+  margin: 0 0 8px 0;
+}
+
+.logo-text p {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin: 30px 0 15px 0;
+  color: #1e293b;
+  border-bottom: 2px solid rgba(230, 0, 122, 0.2);
+  padding-bottom: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.polkadot-icon {
+  color: #E6007A;
+  font-size: 1.2em;
+  text-shadow: 0 0 8px rgba(230, 0, 122, 0.3);
+}
+
+.connection-section,
+.account-section,
+.contract-section,
+.todos-section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 25px;
+  margin: 20px 0;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(230, 0, 122, 0.1);
+  box-shadow: 0 10px 40px rgba(230, 0, 122, 0.08);
+  transition: all 0.3s ease;
+}
+
+.connection-section:hover,
+.account-section:hover,
+.contract-section:hover,
+.todos-section:hover {
+  border-color: rgba(230, 0, 122, 0.3);
+  box-shadow: 0 15px 50px rgba(230, 0, 122, 0.15);
+  transform: translateY(-2px);
+}
+
+button {
+  background: linear-gradient(45deg, #E6007A, #FF6B9D);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(230, 0, 122, 0.3);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(230, 0, 122, 0.5);
+  background: linear-gradient(45deg, #FF6B9D, #E6007A);
+}
+
+button:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.contract-actions {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 15px;
+}
+
+.increment-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+}
+
+input[type="number"] {
+  padding: 12px 16px;
+  border: 2px solid rgba(230, 0, 122, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #1e293b;
+  font-size: 16px;
+  width: 80px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: #E6007A;
+  box-shadow: 0 0 15px rgba(230, 0, 122, 0.2);
+  background: white;
+}
+
+input[type="number"]::placeholder {
+  color: rgba(30, 41, 59, 0.6);
+}
+
+.logs {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+  text-align: left;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+}
+
+.log-entry {
+  margin: 5px 0;
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  border-left: 3px solid #ff6b6b;
+}
+
+p {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-connected {
+  background-color: #4CAF50;
+  box-shadow: 0 0 10px #4CAF50;
+}
+
+.status-disconnected {
+  background-color: #f44336;
+  box-shadow: 0 0 10px #f44336;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .App-header {
+    padding: 10px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.3rem;
+  }
+  
+  .increment-section {
+    flex-direction: column;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Contract address styling */
+.contract-address {
+  background: rgba(230, 0, 122, 0.05);
+  padding: 15px 20px;
+  border-radius: 12px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 13px;
+  word-break: break-all;
+  margin: 15px 0;
+  border: 2px solid rgba(230, 0, 122, 0.1);
+  color: #1e293b;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(230, 0, 122, 0.1);
+}
+
+/* Current value display */
+.current-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced status indicators */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 2px solid rgba(34, 197, 94, 0.2);
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 15px 0;
+  color: #1e293b;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+}
+
+.status-indicator::before {
+  content: '✓';
+  color: #22c55e;
+  font-weight: bold;
+  font-size: 18px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Enhanced button styles */
+button {
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: relative;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+button:hover::before {
+  left: 100%;
+}
+
+/* Change Account Button */
+.change-account-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  font-size: 14px !important;
+  padding: 8px 16px !important;
+  margin: 10px 0 !important;
+}
+
+.change-account-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.account-name {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+  padding: 24px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.modal-body p {
+  margin: 0 0 20px 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+}
+
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.account-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.account-item.selected {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: #ff6b6b;
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+}
+
+.account-info {
+  flex: 1;
+}
+
+.account-item .account-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 4px 0;
+  font-style: normal;
+}
+
+.account-item .account-address {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  word-break: break-all;
+  margin: 0 0 4px 0;
+}
+
+.account-item .account-source {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.account-selected {
+  color: #ff6b6b;
+  font-size: 20px;
+  font-weight: bold;
+  margin-left: 12px;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-cancel {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  padding: 10px 20px !important;
+  font-size: 14px !important;
+}
+
+.modal-cancel:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Modal scrollbar */
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Scrollbar styling */
+.logs::-webkit-scrollbar {
+  width: 8px;
+}
+
+.logs::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.logs::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 107, 0.6);
+  border-radius: 4px;
+}
+
+.logs::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 107, 0.8);
+}
+
+/* Todo-specific styles */
+.todo-counter {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #E6007A;
+  margin: 20px 0;
+  padding: 15px;
+  background: rgba(230, 0, 122, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(230, 0, 122, 0.3);
+}
+
+.add-todo-section {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.todo-input {
+  flex: 1;
+  min-width: 300px;
+  padding: 18px 24px;
+  border: 2px solid rgba(230, 0, 122, 0.2);
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #1e293b;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(230, 0, 122, 0.1);
+}
+
+.todo-input:focus {
+  outline: none;
+  border-color: #E6007A;
+  box-shadow: 0 0 20px rgba(230, 0, 122, 0.2);
+  background: white;
+  transform: translateY(-1px);
+}
+
+.todo-input::placeholder {
+  color: rgba(30, 41, 59, 0.5);
+}
+
+.todos-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  margin: 15px 0;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(230, 0, 122, 0.1);
+  border-radius: 18px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(230, 0, 122, 0.05);
+}
+
+.todo-item:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(230, 0, 122, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(230, 0, 122, 0.15);
+}
+
+.todo-item.completed {
+  opacity: 0.8;
+  background: rgba(230, 0, 122, 0.05);
+  border-color: rgba(230, 0, 122, 0.2);
+}
+
+.todo-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.todo-id {
+  background: linear-gradient(45deg, #E6007A, #FF6B9D);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: center;
+}
+
+.todo-text {
+  font-size: 16px;
+  color: #1e293b;
+  text-align: left;
+  flex: 1;
+  font-weight: 500;
+}
+
+.todo-item.completed .todo-text {
+  text-decoration: line-through;
+  color: rgba(30, 41, 59, 0.6);
+}
+
+.toggle-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(230, 0, 122, 0.2);
+  border: 2px solid rgba(230, 0, 122, 0.5);
+  color: #E6007A;
+  font-size: 20px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+.toggle-btn:hover:not(:disabled) {
+  background: rgba(230, 0, 122, 0.3);
+  border-color: #E6007A;
+  transform: scale(1.1);
+}
+
+.todo-item.completed .toggle-btn {
+  background: rgba(230, 0, 122, 0.4);
+  border-color: #E6007A;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.no-todos {
+  text-align: center;
+  color: rgba(30, 41, 59, 0.6);
+  font-style: italic;
+  padding: 40px 20px;
+  font-size: 18px;
+  background: rgba(230, 0, 122, 0.05);
+  border-radius: 15px;
+  border: 2px dashed rgba(230, 0, 122, 0.2);
+  margin: 20px 0;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Todo list scrollbar */
+.todos-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.todos-list::-webkit-scrollbar-track {
+  background: rgba(230, 0, 122, 0.1);
+  border-radius: 4px;
+}
+
+.todos-list::-webkit-scrollbar-thumb {
+  background: rgba(230, 0, 122, 0.4);
+  border-radius: 4px;
+}
+
+.todos-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 0, 122, 0.6);
+}
+
+/* Responsive design for todos */
+@media (max-width: 768px) {
+  .add-todo-section {
+    flex-direction: column;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .todo-input {
+    min-width: 100%;
+  }
+  
+  .todo-item {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .todo-content {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .todo-text {
+    text-align: center;
   }
 }

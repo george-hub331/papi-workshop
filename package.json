@@ -1,6 +1,7 @@
 {
-  "name": "papi-workshop",
-  "version": "0.1.0",
+  "name": "polkadot-todo-app",
+  "version": "1.0.0",
+  "description": "A decentralized todo application built on Polkadot using Ink! smart contracts",
   "private": true,
   "dependencies": {
     "@polkadot/api": "^16.4.9",

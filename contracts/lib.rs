@@ -53,19 +53,21 @@ mod todo_app {
         }
 
         #[ink(message)]
-        pub fn toggle_todo(&mut self, id: u64) -> bool {
+        pub fn toggle_todo(&mut self, id: u64) -> Option<bool> {
             let caller = self.env().caller();
-            let todo = self.todos.get((caller, id)).unwrap();
-            let mut todo = todo.clone();
-            todo.completed = !todo.completed;
-            self.todos.insert((caller, id), &todo);
-            todo.completed
+            if let Some(mut todo) = self.todos.get((caller, id)) {
+                todo.completed = !todo.completed;
+                self.todos.insert((caller, id), &todo);
+                Some(todo.completed)
+            } else {
+                None
+            }
         }
 
         #[ink(message)]
         pub fn get_todo(&self, id: u64) -> Option<Todo> {
             let caller = self.env().caller();
-            Some(self.todos.get((caller, id)).unwrap())
+            self.todos.get((caller, id))
         }
 
         #[ink(message)]
@@ -135,7 +137,8 @@ mod todo_app {
 
             assert_eq!(todo.completed, false);
 
-            todo_app.toggle_todo(0);
+            let result = todo_app.toggle_todo(0);
+            assert_eq!(result, Some(true));
 
             let todo = todo_app.todos.get(&(accounts.alice, 0)).unwrap();
 
