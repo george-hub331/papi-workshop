@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ContractPromise } from '@polkadot/api-contract';
 import './App.css';
 
 function App() {
 
   const [api, setApi] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
   const [account, setAccount] = useState(null);
   const [contractAddress] = useState('5EYiWfYtMRwn89pocCKUH5gQ8qbQ9NjjRAkNhSRFcAY2YhwN');
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
   const [loading, setLoading] = useState(false);
   const [todoCounter, setTodoCounter] = useState(0);
+  const [error, setError] = useState('');
 
-  // Connect to Substrate node
+  // Connect to Substrate node automatically
   const connectToNode = async () => {
     try {
       setLoading(true);
@@ -25,13 +26,21 @@ function App() {
       const apiInstance = await ApiPromise.create({ provider: wsProvider });
       
       setApi(apiInstance);
-      setIsConnected(true);
+      setError('');
       console.log('Connected to local Substrate node successfully!');
       
       // Get chain info
       const chain = await apiInstance.rpc.system.chain();
       const version = await apiInstance.rpc.system.version();
       console.log(`Connected to chain: ${chain} (${version})`);
+      
+      // Check what's available in the API
+      console.log('Available API modules:', Object.keys(apiInstance));
+      console.log('Available tx modules:', Object.keys(apiInstance.tx || {}));
+      console.log('Contracts module available:', !!apiInstance.tx.contracts);
+      if (apiInstance.tx.contracts) {
+        console.log('Contract methods available:', Object.keys(apiInstance.tx.contracts));
+      }
       
     } catch (error) {
       console.log(`Connection failed: ${error.message}`);
@@ -63,9 +72,25 @@ function App() {
     }
   };
 
+  // Check if contracts are available
+  const checkContractsSupport = useCallback(() => {
+    if (!api) {
+      console.log('API not connected');
+      return false;
+    }
+    
+    return !!(api.tx.contracts);
+  }, [api]);
+
   const getTodoCounter = async () => {
     if (!api || !contractAddress || !account) {
       console.log('Please connect, create account, and ensure contract is deployed');
+      return;
+    }
+
+    if (!checkContractsSupport()) {
+      console.log('Contracts not supported on this network');
+      setError('Contracts not supported on this network. Please ensure you are connected to a Substrate node with contracts pallet enabled.');
       return;
     }
 
@@ -74,29 +99,32 @@ function App() {
       console.log('Getting todo counter...');
       
       const contractMetadata = await loadContractMetadata();
+
       if (!contractMetadata) return;
       
-      // Create contract instance
-      const contract = new api.contracts.ContractPromise(
+      const contract = new ContractPromise(
         api,
         contractMetadata,
         contractAddress
       );
-      
+
       // Call the 'get_counter' method
       const result = await contract.query.getCounter(account.address, {}, account.address);
       
       if (result.result.isOk) {
         const counter = result.output.toHuman();
         setTodoCounter(parseInt(counter));
+        setError('');
         console.log(`Todo counter: ${counter}`);
       } else {
         console.log(`Contract call failed: ${result.result.asErr}`);
+        setError(`Contract call failed: ${result.result.asErr}`);
       }
       
     } catch (error) {
       console.log(`Failed to get counter: ${error.message}`);
       console.error('Get counter error:', error);
+      setError(`Failed to get counter: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -109,21 +137,27 @@ function App() {
       return;
     }
 
+    if (!checkContractsSupport()) {
+      console.log('Contracts not supported on this network');
+      setError('Contracts not supported on this network. Please ensure you are connected to a Substrate node with contracts pallet enabled.');
+      return;
+    }
+
     try {
       setLoading(true);
       console.log(`Adding todo: ${newTodo}`);
       
       const contractMetadata = await loadContractMetadata();
+
       if (!contractMetadata) return;
       
       // Create contract instance
-      const contract = new api.contracts.ContractPromise(
+      const contract = new ContractPromise(
         api,
         contractMetadata,
         contractAddress
       );
       
-      // Call the 'add_todo' method
       const tx = contract.tx.addTodo({}, newTodo.trim());
       
       await tx.signAndSend(account, (result) => {
@@ -134,6 +168,7 @@ function App() {
           console.log(`Transaction finalized: ${result.status.asFinalized}`);
           console.log(`✅ Todo added: ${newTodo}`);
           setNewTodo('');
+          setError('');
           // Refresh the counter and load todos
           getTodoCounter();
           loadTodos();
@@ -143,6 +178,7 @@ function App() {
     } catch (error) {
       console.log(`Add todo failed: ${error.message}`);
       console.error('Add todo error:', error);
+      setError(`Add todo failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -155,6 +191,12 @@ function App() {
       return;
     }
 
+    if (!checkContractsSupport()) {
+      console.log('Contracts not supported on this network');
+      setError('Contracts not supported on this network. Please ensure you are connected to a Substrate node with contracts pallet enabled.');
+      return;
+    }
+
     try {
       setLoading(true);
       console.log(`Toggling todo ${todoId}...`);
@@ -163,7 +205,7 @@ function App() {
       if (!contractMetadata) return;
       
       // Create contract instance
-      const contract = new api.contracts.ContractPromise(
+      const contract = new ContractPromise(
         api,
         contractMetadata,
         contractAddress
@@ -198,12 +240,18 @@ function App() {
       return;
     }
 
+    if (!checkContractsSupport()) {
+      console.log('Contracts not supported on this network');
+      setError('Contracts not supported on this network. Please ensure you are connected to a Substrate node with contracts pallet enabled.');
+      return;
+    }
+
     try {
       const contractMetadata = await loadContractMetadata();
       if (!contractMetadata) return;
       
       // Create contract instance
-      const contract = new api.contracts.ContractPromise(
+      const contract = new ContractPromise(
         api,
         contractMetadata,
         contractAddress
@@ -235,21 +283,17 @@ function App() {
       console.log(`Failed to load todos: ${error.message}`);
       console.error('Load todos error:', error);
     }
-  }, [api, contractAddress, account, todoCounter]);
+  }, [api, contractAddress, account, todoCounter, checkContractsSupport]);
 
-  // Disconnect from node
-  const disconnect = async () => {
-    if (api) {
-      await api.disconnect();
-      setApi(null);
-      setIsConnected(false);
-      setAccount(null);
-      setTodos([]);
-      setTodoCounter(0);
-      setNewTodo('');
-      console.log('Disconnected from node');
-    }
-  };
+
+  // Auto-connect and create account on mount
+  useEffect(() => {
+    const initializeApp = async () => {
+      await connectToNode();
+      createTestAccount();
+    };
+    initializeApp();
+  }, []);
 
   // Load todos when account and counter change
   useEffect(() => {
@@ -260,150 +304,54 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <div className="polkadot-logo">
-   
-          <div className="logo-text">
-            <h1 style={{ margin: "auto" }}>Todo App</h1>
-            <p>Decentralized Todo Management on Polkadot</p>
-          </div>
-        </div>
+      <div className="todo-app">
+        <h1 className="app-title">Todo List</h1>
         
-        <div className="connection-section">
-          <h2>
-            <span className="polkadot-icon">●</span>
-            Connection
-          </h2>
-          {!isConnected ? (
-            <button onClick={connectToNode} disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="loading-spinner"></span>
-                  Connecting...
-                </>
-              ) : (
-                'Connect to Local Node'
-              )}
-            </button>
-          ) : (
-            <>
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}>
-              <div className="status-indicator status-connected"></div><span>Connected to Local Node</span>
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+        
+        <div className="add-todo-section">
+          <input
+            type="text"
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            placeholder="What needs to be done?"
+            className="todo-input"
+            onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+          />
+          <button 
+            onClick={addTodo} 
+            disabled={loading || !account || !newTodo.trim()}
+            className="add-button"
+          >
+            {loading ? 'Adding...' : 'Add'}
+          </button>
+        </div>
+
+        <div className="todos-list">
+          {todos.length === 0 ? (
+            <div className="no-todos">
+              {account ? 'No todos yet. Add one above!' : 'Loading...'}
             </div>
-            <button onClick={disconnect}>Disconnect</button>
-            </>
+          ) : (
+            todos.map((todo) => (
+              <div key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+                <button 
+                  onClick={() => toggleTodo(todo.id)} 
+                  disabled={loading}
+                  className="todo-toggle"
+                >
+                  {todo.completed ? '✓' : ''}
+                </button>
+                <span className="todo-text">{todo.content}</span>
+              </div>
+            ))
           )}
         </div>
-
-        <div className="account-section">
-          <h2>
-            <span className="polkadot-icon">●</span>
-            Account
-          </h2>
-          {!account ? (
-            <button onClick={createTestAccount} disabled={!isConnected}>
-              Create Test Account (//Alice)
-            </button>
-          ) : (
-            <div>
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}>
-                <div className="status-indicator status-connected"></div><span>Account Ready</span>
-              </div>
-              <div className="contract-address">
-                {account.address}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="contract-section">
-          <h2>
-            <span className="polkadot-icon">●</span>
-            Smart Contract
-          </h2>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}>
-            <div className="status-indicator status-connected"></div><span>Contract Deployed</span>
-           
-          </div>
-          <div className="contract-address">
-            {contractAddress}
-          </div>
-          
-          <div className="todo-counter">
-            Total Todos: {todoCounter}
-          </div>
-          
-          <div className="contract-actions">
-            <button onClick={getTodoCounter} disabled={loading || !account}>
-              {loading ? (
-                <>
-                  <span className="loading-spinner"></span>
-                  Loading...
-                </>
-              ) : (
-                'Refresh Counter'
-              )}
-            </button>
-          </div>
-        </div>
-
-        <div className="todos-section">
-          <h2>
-            <span className="polkadot-icon">●</span>
-            Todo List
-          </h2>
-          
-          <div className="add-todo-section">
-            <input
-              type="text"
-              value={newTodo}
-              onChange={(e) => setNewTodo(e.target.value)}
-              placeholder="Enter a new todo..."
-              className="todo-input"
-              onKeyPress={(e) => e.key === 'Enter' && addTodo()}
-            />
-            <button onClick={addTodo} disabled={loading || !account || !newTodo.trim()}>
-              {loading ? (
-                <>
-                  <span className="loading-spinner"></span>
-                  Adding...
-                </>
-              ) : (
-                'Add Todo'
-              )}
-            </button>
-          </div>
-
-          <div className="todos-list">
-            {todos.length === 0 ? (
-              <div className="no-todos">
-                {account ? 'No todos yet. Add one above!' : 'Connect and create an account to manage todos.'}
-              </div>
-            ) : (
-              todos.map((todo) => (
-                <div key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
-                  <div className="todo-content">
-                    <span className="todo-id">#{todo.id}</span>
-                    <span className="todo-text">{todo.content}</span>
-                  </div>
-                  <button 
-                    onClick={() => toggleTodo(todo.id)} 
-                    disabled={loading}
-                    className="toggle-btn"
-                  >
-                    {loading ? (
-                      <span className="loading-spinner"></span>
-                    ) : (
-                      todo.completed ? '✓' : '○'
-                    )}
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-      </header>
+      </div>
     </div>
   );
 }
