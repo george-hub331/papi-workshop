@@ -320,7 +320,7 @@ function App() {
             onChange={(e) => setNewTodo(e.target.value)}
             placeholder="What needs to be done?"
             className="todo-input"
-            onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+            onKeyUp={(e) => e.key === 'Enter' && addTodo()}
           />
           <button 
             onClick={addTodo} 

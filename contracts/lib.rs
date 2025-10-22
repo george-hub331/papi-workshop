@@ -109,14 +109,14 @@ mod todo_app {
 
             let mut todo_app = TodoApp::default();
 
-            todo_app.add_todo("Go shoping with crush".to_string());
+            todo_app.add_todo("Go out and touch some grass".to_string());
 
             assert_eq!(todo_app.get_counter(accounts.alice), 1);
 
             let todo = todo_app.todos.get(&(accounts.alice, 0)).unwrap();
 
             assert_eq!(todo.id, 0);
-            assert_eq!(todo.content, "Go shoping with crush".to_string());
+            assert_eq!(todo.content, "Go out and touch some grass".to_string());
             assert_eq!(todo.completed, false);
         }
 
@@ -131,7 +131,7 @@ mod todo_app {
 
             let mut todo_app = TodoApp::default();
 
-            todo_app.add_todo("Go shoping with crush".to_string());
+            todo_app.add_todo("Go out and touch some grass".to_string());
 
             let todo = todo_app.todos.get(&(accounts.alice, 0)).unwrap();
 
@@ -156,12 +156,12 @@ mod todo_app {
 
             let mut todo_app = TodoApp::default();
 
-            todo_app.add_todo("Go shoping with crush".to_string());
+            todo_app.add_todo("Go out and touch some grass".to_string());
 
             let todo = todo_app.get_todo(0).unwrap();
 
             assert_eq!(todo.id, 0);
-            assert_eq!(todo.content, "Go shoping with crush".to_string());
+            assert_eq!(todo.content, "Go out and touch some grass".to_string());
             assert_eq!(todo.completed, false);
         }
     }
