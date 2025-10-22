@@ -254,10 +254,6 @@ This is a workshop project designed for educational purposes. Feel free to:
 - Improve documentation
 - Submit pull requests
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ---
 
 **Happy Building! 🚀**
