@@ -5,13 +5,14 @@ authors = ["hongthaipham <hongthaipro@gmail.com>", "joel george <idiaghegeorge9@
 edition = "2024"
 
 [dependencies]
-ink = { version = "6.0.0-alpha", default-features = false }
-ink_primitives = "5.1.1"
-scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
-scale-info = { version = "2", default-features = false, features = ["derive"] }
+ink = { git = "https://github.com/use-ink/ink", tag = "v6.0.0-alpha.4", version = "6.0.0-alpha.4", default-features = false, features = ["unstable-hostfn"] }
+# ink = { version = "6.0.0-alpha", default-features = false }
+# scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
 
 [dev-dependencies]
-ink_e2e = { version = "6.0.0-alpha" }
+ink_e2e = { git = "https://github.com/use-ink/ink", tag = "v6.0.0-alpha.4", version = "6.0.0-alpha.4" }
+scale-info = { version = "2.6", default-features = false, features = ["derive"] }
+# ink_e2e = { version = "6.0.0-alpha" }
 
 [lib]
 path = "lib.rs"
@@ -21,3 +22,12 @@ default = ["std"]
 std = ["ink/std"]
 ink-as-dependency = []
 e2e-tests = []
+
+[package.metadata.ink-lang]
+abi = "ink"
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = [
+    'cfg(ink_abi, values("ink", "sol", "all"))'
+]

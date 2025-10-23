@@ -4,10 +4,17 @@
 mod todo_app {
     use ink::prelude::string::String;
     use ink::storage::Mapping;
-    use ink_primitives::AccountId as ink_AccountId;
 
-    #[derive(Default, Clone, scale::Encode, scale::Decode, scale_info::TypeInfo)]
-    #[cfg_attr(feature = "std", derive(ink::storage::traits::StorageLayout))]
+    #[cfg_attr(
+        feature = "std",
+        derive(
+            Debug,
+            PartialEq,
+            Eq,
+            ink::storage::traits::StorageLayout,
+        )
+    )]
+    #[ink::scale_derive(Encode, Decode, TypeInfo)]
     pub struct Todo {
         pub id: u64,
         pub content: String,
