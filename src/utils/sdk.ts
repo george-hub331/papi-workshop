@@ -3,7 +3,7 @@ import { createAtom } from '@xstate/store'
 import { createClient } from 'polkadot-api'
 import { withPolkadotSdkCompat } from 'polkadot-api/polkadot-sdk-compat'
 import { getWsProvider } from 'polkadot-api/ws-provider/web'
-import { dot, dot_asset_hub, pas, pas_asset_hub } from '../descriptors'
+import { dot, dot_asset_hub, pas, pas_asset_hub, passet } from '../descriptors'
 
 export const config = {
   dot: {
@@ -20,6 +20,10 @@ export const config = {
   },
   pas_asset_hub: {
     descriptor: pas_asset_hub,
+    providers: ['wss://testnet-passet-hub.polkadot.io'],
+  },
+  passet: {
+    descriptor: passet,
     providers: ['wss://testnet-passet-hub.polkadot.io'],
   },
 } as const

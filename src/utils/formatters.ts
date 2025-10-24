@@ -6,6 +6,7 @@ const subscan: Record<Prefix, string> = {
   dot_asset_hub: 'https://assethub-polkadot.subscan.io',
   pas: 'https://paseo.subscan.io',
   pas_asset_hub: 'https://assethub-paseo.subscan.io',
+  passet: 'https://testnet-passet-hub.polkadot.io',
 }
 
 export function unifyAddress(address: string) {

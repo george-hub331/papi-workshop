@@ -18,17 +18,19 @@ import { useConnect } from './hooks/useConnect'
 import sdk, { config } from './utils/sdk'
 
 import { polkadotSigner } from './utils/sdk-interface'
+import { Binary } from 'polkadot-api'
 
 function App() {
   
-  const CONTRACT_ADDRESS = '0x9d24982E273eC30b333cbBCf241025d78C7ecd5A'
+  const CONTRACT_ADDRESS = '0x7845C37F932323C4f206bbcf264841b44Ea073Dd'
 
   const { selectedAccount } = useConnect()
   const [isLoading, setIsLoading] = useState(true)
-  const [todos, setTodos] = useState<Array<{ id: bigint, content: string, completed: boolean }>>([])
+  const [todos, setTodos] = useState<Array<{ id: bigint, amount: number, content: string, completed: boolean }>>([])
   const [, setTodoCounter] = useState<bigint>(0n)
+  const [addTodoLoader, setAddTodoLoader] = useState<boolean>(false)
 
-  const { client } = sdk('pas_asset_hub')
+  const { client } = sdk('passet')
 
   const inkSdk = createInkSdk(client)
 
@@ -101,17 +103,21 @@ function App() {
 
     // 4. Return hex string
     return u8aToHex(ethAddress)
+    
   }
 
   const getTodo = async (id: bigint) => {
     if (!selectedAccount)
       return
 
+    console.log(id, 'id')
+
+
     const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
 
     const result = await todoContract.query('get_todo', {
       data: { id },
-      origin: substrateToEthereumAddress(selectedAccount.address),
+      origin: selectedAccount.address,
     })
 
     console.warn(result, 'getTodo result')
@@ -124,9 +130,10 @@ function App() {
 
     const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
 
+
     const result = await todoContract.query('get_counter', {
-      data: { account_id: selectedAccount.address },
-      origin: substrateToEthereumAddress(selectedAccount.address),
+      data: { account_id: Binary.fromHex(substrateToEthereumAddress(selectedAccount.address)) },
+      origin: selectedAccount.address,
     })
 
     console.warn(result, 'getCounter result')
@@ -134,25 +141,33 @@ function App() {
   }
 
   const fetchTodos = async () => {
+
     if (!selectedAccount)
       return
+
 
     try {
       // First get the counter to know how many todos we have
       const counterResult = await getCounter()
-      if (counterResult && 'Ok' in counterResult) {
-        const count = (counterResult.Ok as { count: bigint }).count
+
+      console.log(counterResult, 'counterResult')
+
+      if (counterResult?.success) {
+        
+        const count = counterResult.value.response - 1n;
+
         setTodoCounter(count)
 
-        const todosList: Array<{ id: bigint, content: string, completed: boolean }> = []
-        for (let i = 1n; i <= count; i++) {
+        const todosList: Array<{ id: bigint, amount: number, content: string, completed: boolean }> = []
+        for (let i = 0n; i <= count; i++) {
           try {
             const todoResult = await getTodo(i)
-            if (todoResult && 'Ok' in todoResult && todoResult.Ok) {
+            if (todoResult?.success) {
               todosList.push({
                 id: i,
-                content: (todoResult.Ok as { content: string }).content,
-                completed: (todoResult.Ok as { completed: boolean }).completed,
+                amount: Number((todoResult.value.response?.amount[0] || 0n) / (10n * 10n ** 10n)),
+                content: todoResult.value.response?.content ?? '',
+                completed: todoResult.value.response?.completed ?? false,
               })
             }
           }
@@ -179,18 +194,22 @@ function App() {
   }, [selectedAccount, isLoading])
 
   const addTodo = async (content: string) => {
-    if (!selectedAccount)
+    
+    if (!selectedAccount || addTodoLoader)
       return
+
+    setAddTodoLoader(true)
 
     const signer = (await polkadotSigner())!
     const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
 
     const result = await todoContract.send('add_todo', {
       data: { content },
-      origin: substrateToEthereumAddress(selectedAccount.address),
+      origin: selectedAccount.address,
+      value: 10n * 10n ** 10n,
     }).signAndSubmit(signer)
 
-    console.warn(result, 'addTodo result')
+    setAddTodoLoader(false);
 
     // Refresh todos after adding
     setTimeout(() => {
@@ -209,7 +228,7 @@ function App() {
 
     const result = await todoContract.send('toggle_todo', {
       data: { id },
-      origin: substrateToEthereumAddress(selectedAccount.address),
+      origin: selectedAccount.address,
     }).signAndSubmit(signer)
 
     console.warn(result, 'toggleTodo result')
@@ -288,7 +307,7 @@ function App() {
                     }}
                     className="bg-black text-white px-6 py-3 border border-black hover:bg-white hover:text-black transition-colors"
                   >
-                    Add
+                    {addTodoLoader ? 'Adding...' : 'Add'}
                   </button>
                 </div>
               </div>
@@ -320,7 +339,7 @@ function App() {
                               {todo.completed ? '✓' : ''}
                             </button>
                             <span className={`flex-1 ${todo.completed ? 'line-through text-gray-500' : ''}`}>
-                              {todo.content}
+                              {todo.content} - {todo.amount} PAS
                             </span>
                             <span className="text-xs text-gray-400">
                               ID:
