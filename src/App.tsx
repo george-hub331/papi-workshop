@@ -20,6 +20,7 @@ import sdk, { config } from './utils/sdk'
 import { polkadotSigner } from './utils/sdk-interface'
 
 function App() {
+  
   const CONTRACT_ADDRESS = '0x9d24982E273eC30b333cbBCf241025d78C7ecd5A'
 
   const { selectedAccount } = useConnect()

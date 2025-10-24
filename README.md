@@ -2,6 +2,8 @@
 
 A modern **React + TypeScript + Vite** template for building Polkadot decentralized applications (dApps) using the PAPI SDK.
 
+> This project was generated using [createdot.app](https://createdot.app) scaffold.
+
 ## 🚀 Features
 
 - **React** with TypeScript support
@@ -9,7 +11,6 @@ A modern **React + TypeScript + Vite** template for building Polkadot decentrali
 - **PAPI SDK** integration for Polkadot blockchain interaction
 - **TailwindCSS + DaisyUI** for beautiful UI components
 - **Wallet Connection** support via Talisman Connect
-- **XState Store** for state management
 - **Iconify** icons integration
 - Pre-configured for **multiple Polkadot chains**
 
@@ -18,6 +19,10 @@ A modern **React + TypeScript + Vite** template for building Polkadot decentrali
 This template uses **PAPI (Polkadot API)** - a modern, type-safe SDK for interacting with Polkadot-based blockchains.
 
 📚 **PAPI Documentation**: https://papi.how/
+
+### Ink SDK Resources:
+- **Ink SDK Documentation**: https://papi.how/ink-sdk
+- **Smart Contract Development**: https://papi.how/ink-sdk/contracts
 
 ### Configuration Files:
 - **`src/utils/sdk.ts`** - Configures which chains to connect to and manages chain endpoints. You can modify supported networks and RPC providers here.

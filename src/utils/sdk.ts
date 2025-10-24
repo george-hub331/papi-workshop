@@ -20,7 +20,7 @@ export const config = {
   },
   pas_asset_hub: {
     descriptor: pas_asset_hub,
-    providers: ['wss://pas-rpc.stakeworld.io/assethub'],
+    providers: ['wss://testnet-passet-hub.polkadot.io'],
   },
 } as const
 
