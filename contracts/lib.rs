@@ -76,9 +76,7 @@ mod todo_app {
 
             // ✅ use &caller
             if let Some(mut todo) = self.todos.get((caller, id)) {
-                todo.completed = !todo.completed;
-                self.todos.insert((caller, id), &todo);
-                Some(todo.completed)
+                todo!()
             } else {
                 None
             }
@@ -93,15 +91,7 @@ mod todo_app {
                 if todo.completed == false {
                     return Err(Error::InvalidTodo);
                 }
-                if balance < todo.amount {
-                    return Err(Error::NotEnoughFunds);
-                } else {
-                    let amount = todo.amount;
-                    todo.amount = U256::from(0);
-
-                    self.todos.insert((caller, id), &todo);
-                    self.env().transfer(caller, amount).expect("Transfer failed");
-                }
+                todo!()
                 Ok(())
             } else {
                 Err(Error::InvalidTodo)
@@ -110,10 +100,7 @@ mod todo_app {
 
         #[ink(message)]
         pub fn get_todo(&self, id: u64) -> Option<Todo> {
-            let caller = self.env().caller();
-
-            // ✅ use &caller
-            self.todos.get((&caller, id))
+            todo!()
         }
 
         #[ink(message)]
