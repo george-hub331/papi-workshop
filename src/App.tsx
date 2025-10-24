@@ -18,17 +18,19 @@ import { useConnect } from './hooks/useConnect'
 import sdk, { config } from './utils/sdk'
 
 import { polkadotSigner } from './utils/sdk-interface'
+import { Binary } from 'polkadot-api'
 
 function App() {
   
-  const CONTRACT_ADDRESS = '0x9d24982E273eC30b333cbBCf241025d78C7ecd5A'
+  const CONTRACT_ADDRESS = '0x7845C37F932323C4f206bbcf264841b44Ea073Dd'
 
   const { selectedAccount } = useConnect()
   const [isLoading, setIsLoading] = useState(true)
-  const [todos, setTodos] = useState<Array<{ id: bigint, content: string, completed: boolean }>>([])
+  const [todos, setTodos] = useState<Array<{ id: bigint, amount: number, content: string, completed: boolean }>>([])
   const [, setTodoCounter] = useState<bigint>(0n)
+  const [addTodoLoader, setAddTodoLoader] = useState<boolean>(false)
 
-  const {api, client } = sdk('passet')
+  const { client } = sdk('passet')
 
   const inkSdk = createInkSdk(client)
 
@@ -101,19 +103,86 @@ function App() {
 
     // 4. Return hex string
     return u8aToHex(ethAddress)
-
+    
   }
 
   const getTodo = async (id: bigint) => {
-    
+    if (!selectedAccount)
+      return
+
+    console.log(id, 'id')
+
+
+    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
+
+    const result = await todoContract.query('get_todo', {
+      data: { id },
+      origin: selectedAccount.address,
+    })
+
+    console.warn(result, 'getTodo result')
+    return result
   }
 
   const getCounter = async () => {
-    
+    if (!selectedAccount)
+      return
+
+    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
+
+
+    const result = await todoContract.query('get_counter', {
+      data: { account_id: Binary.fromHex(substrateToEthereumAddress(selectedAccount.address)) },
+      origin: selectedAccount.address,
+    })
+
+    console.warn(result, 'getCounter result')
+    return result
   }
 
   const fetchTodos = async () => {
 
+    if (!selectedAccount)
+      return
+
+
+    try {
+      // First get the counter to know how many todos we have
+      const counterResult = await getCounter()
+
+      console.log(counterResult, 'counterResult')
+
+      if (counterResult?.success) {
+        
+        const count = counterResult.value.response - 1n;
+
+        setTodoCounter(count)
+
+        const todosList: Array<{ id: bigint, amount: number, content: string, completed: boolean }> = []
+        for (let i = 0n; i <= count; i++) {
+          try {
+            const todoResult = await getTodo(i)
+            if (todoResult?.success) {
+              todosList.push({
+                id: i,
+                amount: Number((todoResult.value.response?.amount[0] || 0n) / (10n * 10n ** 10n)),
+                content: todoResult.value.response?.content ?? '',
+                completed: todoResult.value.response?.completed ?? false,
+              })
+            }
+          }
+          catch (error) {
+            console.error(`Error fetching todo ${i}:`, error)
+          }
+        }
+
+        setTodos(todosList)
+        console.warn('Fetched todos:', todosList)
+      }
+    }
+    catch (error) {
+      console.error('Error fetching todos:', error)
+    }
   }
 
   // Fetch todos when account is ready
@@ -126,11 +195,50 @@ function App() {
 
   const addTodo = async (content: string) => {
     
-    
+    if (!selectedAccount || addTodoLoader)
+      return
+
+    setAddTodoLoader(true)
+
+    const signer = (await polkadotSigner())!
+    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
+
+    const result = await todoContract.send('add_todo', {
+      data: { content },
+      origin: selectedAccount.address,
+      value: 10n * 10n ** 10n,
+    }).signAndSubmit(signer)
+
+    setAddTodoLoader(false);
+
+    // Refresh todos after adding
+    setTimeout(() => {
+      fetchTodos()
+    }, 2000)
+
+    return result
   }
 
   const toggleTodo = async (id: bigint) => {
-    
+    if (!selectedAccount)
+      return
+
+    const signer = (await polkadotSigner())!
+    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
+
+    const result = await todoContract.send('toggle_todo', {
+      data: { id },
+      origin: selectedAccount.address,
+    }).signAndSubmit(signer)
+
+    console.warn(result, 'toggleTodo result')
+
+    // Refresh todos after toggling
+    setTimeout(() => {
+      fetchTodos()
+    }, 2000)
+
+    return result
   }
 
   return (
@@ -199,7 +307,7 @@ function App() {
                     }}
                     className="bg-black text-white px-6 py-3 border border-black hover:bg-white hover:text-black transition-colors"
                   >
-                    Add
+                    {addTodoLoader ? 'Adding...' : 'Add'}
                   </button>
                 </div>
               </div>
@@ -231,7 +339,7 @@ function App() {
                               {todo.completed ? '✓' : ''}
                             </button>
                             <span className={`flex-1 ${todo.completed ? 'line-through text-gray-500' : ''}`}>
-                              {todo.content}
+                              {todo.content} - {todo.amount} PAS
                             </span>
                             <span className="text-xs text-gray-400">
                               ID:
