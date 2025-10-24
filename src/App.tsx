@@ -28,7 +28,7 @@ function App() {
   const [todos, setTodos] = useState<Array<{ id: bigint, content: string, completed: boolean }>>([])
   const [, setTodoCounter] = useState<bigint>(0n)
 
-  const { client } = sdk('pas_asset_hub')
+  const {api, client } = sdk('passet')
 
   const inkSdk = createInkSdk(client)
 
@@ -101,73 +101,19 @@ function App() {
 
     // 4. Return hex string
     return u8aToHex(ethAddress)
+
   }
 
   const getTodo = async (id: bigint) => {
-    if (!selectedAccount)
-      return
-
-    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
-
-    const result = await todoContract.query('get_todo', {
-      data: { id },
-      origin: substrateToEthereumAddress(selectedAccount.address),
-    })
-
-    console.warn(result, 'getTodo result')
-    return result
+    
   }
 
   const getCounter = async () => {
-    if (!selectedAccount)
-      return
-
-    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
-
-    const result = await todoContract.query('get_counter', {
-      data: { account_id: selectedAccount.address },
-      origin: substrateToEthereumAddress(selectedAccount.address),
-    })
-
-    console.warn(result, 'getCounter result')
-    return result
+    
   }
 
   const fetchTodos = async () => {
-    if (!selectedAccount)
-      return
 
-    try {
-      // First get the counter to know how many todos we have
-      const counterResult = await getCounter()
-      if (counterResult && 'Ok' in counterResult) {
-        const count = (counterResult.Ok as { count: bigint }).count
-        setTodoCounter(count)
-
-        const todosList: Array<{ id: bigint, content: string, completed: boolean }> = []
-        for (let i = 1n; i <= count; i++) {
-          try {
-            const todoResult = await getTodo(i)
-            if (todoResult && 'Ok' in todoResult && todoResult.Ok) {
-              todosList.push({
-                id: i,
-                content: (todoResult.Ok as { content: string }).content,
-                completed: (todoResult.Ok as { completed: boolean }).completed,
-              })
-            }
-          }
-          catch (error) {
-            console.error(`Error fetching todo ${i}:`, error)
-          }
-        }
-
-        setTodos(todosList)
-        console.warn('Fetched todos:', todosList)
-      }
-    }
-    catch (error) {
-      console.error('Error fetching todos:', error)
-    }
   }
 
   // Fetch todos when account is ready
@@ -179,47 +125,12 @@ function App() {
   }, [selectedAccount, isLoading])
 
   const addTodo = async (content: string) => {
-    if (!selectedAccount)
-      return
-
-    const signer = (await polkadotSigner())!
-    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
-
-    const result = await todoContract.send('add_todo', {
-      data: { content },
-      origin: substrateToEthereumAddress(selectedAccount.address),
-    }).signAndSubmit(signer)
-
-    console.warn(result, 'addTodo result')
-
-    // Refresh todos after adding
-    setTimeout(() => {
-      fetchTodos()
-    }, 2000)
-
-    return result
+    
+    
   }
 
   const toggleTodo = async (id: bigint) => {
-    if (!selectedAccount)
-      return
-
-    const signer = (await polkadotSigner())!
-    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
-
-    const result = await todoContract.send('toggle_todo', {
-      data: { id },
-      origin: substrateToEthereumAddress(selectedAccount.address),
-    }).signAndSubmit(signer)
-
-    console.warn(result, 'toggleTodo result')
-
-    // Refresh todos after toggling
-    setTimeout(() => {
-      fetchTodos()
-    }, 2000)
-
-    return result
+    
   }
 
   return (
