@@ -28,13 +28,6 @@ This template uses **PAPI (Polkadot API)** - a modern, type-safe SDK for interac
 - **`src/utils/sdk.ts`** - Configures which chains to connect to and manages chain endpoints. You can modify supported networks and RPC providers here.
 - **`src/utils/sdk-interface.ts`** - Provides high-level functions for onchain SDK calls.
 
-## 🌐 Supported Chains
-
-The template comes pre-configured for:
-- **Polkadot** (DOT) - Main network
-- **Polkadot Asset Hub** - Asset management
-- **Paseo** (PAS) - Testnet
-- **Paseo Asset Hub** - Testnet asset management
 
 ## 🛠️ Getting Started
 
@@ -74,11 +67,20 @@ PAPI requires type descriptors for each chain. Generate them using the PAPI CLI:
 # Add a new chain using a WebSocket endpoint
 npx papi add your_chain -w wss://your-rpc-endpoint.io
 
-# Or use a well-known chain name
-npx papi add kusama -n ksmcc3
+# Add  (PASET) testnet
+npx papi add -w wss://testnet-passet-hub.polkadot.io passet
 
 # Generate descriptors (automatically runs on postinstall)
 npx papi
+```
+
+### Generating Ink Contract Descriptors
+
+For smart contracts built with Ink!, you can generate type-safe descriptors:
+
+```bash
+# Generate descriptors for an Ink! contract
+npx papi ink add ./src/deployments/todo_app.contract -k todo
 ```
 
 This creates type-safe descriptors in `@polkadot-api/descriptors` that you can import.
