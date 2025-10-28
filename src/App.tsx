@@ -9,19 +9,18 @@ import {
   keccakAsU8a,
 } from '@polkadot/util-crypto'
 
+import { Binary } from 'polkadot-api'
 import { useEffect, useState } from 'react'
 import Footer from './components/Footer'
 import Header from './components/Header'
 import { contracts } from './descriptors'
+
 import { useConnect } from './hooks/useConnect'
 
 import sdk, { config } from './utils/sdk'
-
 import { polkadotSigner } from './utils/sdk-interface'
-import { Binary } from 'polkadot-api'
 
 function App() {
-  
   const CONTRACT_ADDRESS = '0x7845C37F932323C4f206bbcf264841b44Ea073Dd'
 
   const { selectedAccount } = useConnect()
@@ -103,20 +102,76 @@ function App() {
 
     // 4. Return hex string
     return u8aToHex(ethAddress)
-    
   }
 
   const getTodo = async (id: bigint) => {
-    
+    if (!selectedAccount)
+      return
+
+    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
+
+    const result = await todoContract.query('get_todo', {
+      data: { id },
+      origin: selectedAccount.address,
+    })
+
+    console.warn(result, 'getTodo result')
+    return result
   }
 
   const getCounter = async () => {
-    
+    if (!selectedAccount)
+      return
 
+    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
+
+    const result = await todoContract.query('get_counter', {
+      data: { account_id: Binary.fromHex(substrateToEthereumAddress(selectedAccount.address)) },
+      origin: selectedAccount.address,
+    })
+
+    console.warn(result, 'getCounter result')
+    return result
   }
 
   const fetchTodos = async () => {
-    
+    if (!selectedAccount)
+      return
+
+    try {
+      // First get the counter to know how many todos we have
+      const counterResult = await getCounter()
+
+      if (counterResult?.success) {
+        const count = counterResult.value.response - 1n
+
+        setTodoCounter(count)
+
+        const todosList: Array<{ id: bigint, amount: number, content: string, completed: boolean }> = []
+        for (let i = 0n; i <= count; i++) {
+          try {
+            const todoResult = await getTodo(i)
+            if (todoResult?.success) {
+              todosList.push({
+                id: i,
+                amount: Number((todoResult.value.response?.amount[0] || 0n) / (10n * 10n ** 10n)),
+                content: todoResult.value.response?.content ?? '',
+                completed: todoResult.value.response?.completed ?? false,
+              })
+            }
+          }
+          catch (error) {
+            console.error(`Error fetching todo ${i}:`, error)
+          }
+        }
+
+        setTodos(todosList)
+        console.warn('Fetched todos:', todosList)
+      }
+    }
+    catch (error) {
+      console.error('Error fetching todos:', error)
+    }
   }
 
   // Fetch todos when account is ready
@@ -128,7 +183,6 @@ function App() {
   }, [selectedAccount, isLoading])
 
   const addTodo = async (content: string) => {
-    
     if (!selectedAccount || addTodoLoader)
       return
 
@@ -143,7 +197,7 @@ function App() {
       value: 10n * 10n ** 10n,
     }).signAndSubmit(signer)
 
-    setAddTodoLoader(false);
+    setAddTodoLoader(false)
 
     // Refresh todos after adding
     setTimeout(() => {
@@ -154,7 +208,23 @@ function App() {
   }
 
   const toggleTodo = async (id: bigint) => {
-    
+    if (!selectedAccount)
+      return
+
+    const signer = (await polkadotSigner())!
+    const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
+
+    const result = await todoContract.send('toggle_todo', {
+      data: { id },
+      origin: selectedAccount.address,
+    }).signAndSubmit(signer)
+
+    console.warn(result, 'toggleTodo result')
+
+    // Refresh todos after toggling
+    setTimeout(() => {
+      fetchTodos()
+    }, 2000)
   }
 
   return (
@@ -255,7 +325,12 @@ function App() {
                               {todo.completed ? '✓' : ''}
                             </button>
                             <span className={`flex-1 ${todo.completed ? 'line-through text-gray-500' : ''}`}>
-                              {todo.content} - {todo.amount} PAS
+                              {todo.content}
+                              {' '}
+                              -
+                              {todo.amount}
+                              {' '}
+                              PAS
                             </span>
                             <span className="text-xs text-gray-400">
                               ID:

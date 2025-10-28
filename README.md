@@ -28,7 +28,6 @@ This template uses **PAPI (Polkadot API)** - a modern, type-safe SDK for interac
 - **`src/utils/sdk.ts`** - Configures which chains to connect to and manages chain endpoints. You can modify supported networks and RPC providers here.
 - **`src/utils/sdk-interface.ts`** - Provides high-level functions for onchain SDK calls.
 
-
 ## 🛠️ Getting Started
 
 ```bash
@@ -49,6 +48,7 @@ npm run preview
 
 ```
 src/
+├── deployments/    # our contracts .contract and .json files
 ├── components/     # React components
 ├── hooks/          # Custom React hooks
 ├── utils/          # Utility functions and SDK setup
