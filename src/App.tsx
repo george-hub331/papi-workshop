@@ -9,19 +9,18 @@ import {
   keccakAsU8a,
 } from '@polkadot/util-crypto'
 
+import { Binary } from 'polkadot-api'
 import { useEffect, useState } from 'react'
 import Footer from './components/Footer'
 import Header from './components/Header'
 import { contracts } from './descriptors'
+
 import { useConnect } from './hooks/useConnect'
 
 import sdk, { config } from './utils/sdk'
-
 import { polkadotSigner } from './utils/sdk-interface'
-import { Binary } from 'polkadot-api'
 
 function App() {
-  
   const CONTRACT_ADDRESS = '0x7845C37F932323C4f206bbcf264841b44Ea073Dd'
 
   const { selectedAccount } = useConnect()
@@ -103,15 +102,11 @@ function App() {
 
     // 4. Return hex string
     return u8aToHex(ethAddress)
-    
   }
 
   const getTodo = async (id: bigint) => {
     if (!selectedAccount)
       return
-
-    console.log(id, 'id')
-
 
     const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
 
@@ -130,7 +125,6 @@ function App() {
 
     const todoContract = inkSdk.getContract(contracts.todo, CONTRACT_ADDRESS)
 
-
     const result = await todoContract.query('get_counter', {
       data: { account_id: Binary.fromHex(substrateToEthereumAddress(selectedAccount.address)) },
       origin: selectedAccount.address,
@@ -141,20 +135,15 @@ function App() {
   }
 
   const fetchTodos = async () => {
-
     if (!selectedAccount)
       return
-
 
     try {
       // First get the counter to know how many todos we have
       const counterResult = await getCounter()
 
-      console.log(counterResult, 'counterResult')
-
       if (counterResult?.success) {
-        
-        const count = counterResult.value.response - 1n;
+        const count = counterResult.value.response - 1n
 
         setTodoCounter(count)
 
@@ -194,7 +183,6 @@ function App() {
   }, [selectedAccount, isLoading])
 
   const addTodo = async (content: string) => {
-    
     if (!selectedAccount || addTodoLoader)
       return
 
@@ -209,7 +197,7 @@ function App() {
       value: 10n * 10n ** 10n,
     }).signAndSubmit(signer)
 
-    setAddTodoLoader(false);
+    setAddTodoLoader(false)
 
     // Refresh todos after adding
     setTimeout(() => {
@@ -339,7 +327,12 @@ function App() {
                               {todo.completed ? '✓' : ''}
                             </button>
                             <span className={`flex-1 ${todo.completed ? 'line-through text-gray-500' : ''}`}>
-                              {todo.content} - {todo.amount} PAS
+                              {todo.content}
+                              {' '}
+                              -
+                              {todo.amount}
+                              {' '}
+                              PAS
                             </span>
                             <span className="text-xs text-gray-400">
                               ID:
