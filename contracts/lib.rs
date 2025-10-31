@@ -83,22 +83,6 @@ mod todo_app {
         }
 
         #[ink(message)]
-        pub fn reclaim_deposit(&mut self, id: u64) -> Result<(), Error> {
-            let caller = self.env().caller();
-            let balance = self.env().balance();
-
-            if let Some(mut todo) = self.todos.get((caller, id)) {
-                if todo.completed == false {
-                    return Err(Error::InvalidTodo);
-                }
-                todo!()
-                Ok(())
-            } else {
-                Err(Error::InvalidTodo)
-            }
-        }
-
-        #[ink(message)]
         pub fn get_todo(&self, id: u64) -> Option<Todo> {
             todo!()
         }
