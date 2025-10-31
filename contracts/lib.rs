@@ -15,7 +15,6 @@ mod todo_app {
             ink::storage::traits::StorageLayout,
         )
     )]
-    #[ink::scale_derive(Encode, Decode, TypeInfo)]
     pub struct Todo {
         pub id: u64,
         pub content: String,
